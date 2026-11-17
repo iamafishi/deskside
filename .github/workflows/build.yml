@@ -21,8 +21,13 @@ jobs:
           node-version: 22
           cache: pnpm
 
+      - name: Versions
+        run: |
+          node -v
+          pnpm -v
+
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build (electron-packager)
         shell: bash
