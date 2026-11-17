@@ -33,7 +33,7 @@
 
 ## 快速开始（Windows）
 
-1. 到 [Releases](https://github.com/<你的账号>/deskside/releases) 下载 `桌边-win32-x64.zip`，解压到任意目录（免安装）
+1. 到 [Releases](https://github.com/iamafishi/deskside/releases) 下载 `桌边-win32-x64.zip`，解压到任意目录（免安装）
 2. 双击 `桌边.exe`
 3. 第一次打开会弹一个向导：选模型服务 → 粘 API Key → 开始用
 
@@ -76,7 +76,7 @@
 需要 Node 20+、pnpm。
 
 ```bash
-git clone https://github.com/<你的账号>/deskside.git
+git clone https://github.com/iamafishi/deskside.git
 cd deskside
 pnpm install
 pnpm start          # 开发运行
