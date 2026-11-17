@@ -1,0 +1,40 @@
+# 依赖与构建产物
+node_modules/
+dist/
+_stage/
+*-win32-x64/
+*-win-unpacked/
+*.asar
+
+# 开发自用文件（不进公开仓库）
+_dev/
+
+# 运行时数据与日志
+_smoke_data/
+*.log
+store.json
+boot.log
+tts-server.log
+toolwindow.log
+
+# 本地语音模型相关（体积巨大，且由用户自行安装）
+checkpoints/
+*.pth
+*.pt
+*.onnx
+hf_cache/
+.venv/
+
+# 编辑器 / 系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 打包与临时文件
+*.zip
+*.7z
+*.tmp
+__pycache__/
+*.pyc

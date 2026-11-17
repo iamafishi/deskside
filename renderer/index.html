@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; media-src 'self' data: blob:; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>桌边</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="card" class="card">
+    <header id="bar">
+      <div class="brand" id="brand">
+        <span class="name" id="brand-name">桌边</span>
+        <span class="live"></span>
+      </div>
+      <div class="tools">
+        <button id="btn-theme" class="tool" title="切换白天 / 夜间">☀</button>
+        <button id="btn-mode" class="tool" title="切换：浮在最前 / 贴桌面"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3h14"/><path d="M12 21V8"/><path d="M6 13l6-6 6 6"/></svg></button>
+        <button id="btn-lock" class="tool" title="固定：锁住位置和大小"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"/><path d="M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.3V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.7a2 2 0 0 0-1.1-1.8l-1.8-.9A2 2 0 0 1 15 10.8V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg></button>
+        <button id="btn-settings" class="tool" title="设置">⚙</button>
+        <button id="btn-hide" class="tool" title="收起来（Ctrl+Alt+Space 再叫出来）">✕</button>
+      </div>
+    </header>
+
+    <div id="clockbar">
+      <div class="clock-row">
+        <div class="clock" id="clock">
+          <span id="c-h">--</span><i>:</i><span id="c-m">--</span><i>:</i><span id="c-s">--</span>
+        </div>
+        <div class="clock-meta">
+          <div id="date" class="date">—</div>
+          <div id="progress" class="progress"></div>
+        </div>
+      </div>
+
+      <div class="week" id="week">
+        <button class="wk-nav" id="wk-prev" title="上一周">‹</button>
+        <div class="wk-days" id="wk-days"></div>
+        <button class="wk-nav" id="wk-next" title="下一周">›</button>
+      </div>
+      <div class="wk-foot">
+        <span class="wk-label" id="wk-label"></span>
+        <button class="wk-toggle" id="btn-week-toggle" title="展开整月" aria-pressed="false">⤢ 展开整月</button>
+      </div>
+    </div>
+
+    <main id="scroll">
+      <section id="dayhead" class="dayhead">
+        <span id="dayhead-label"></span>
+        <button id="btn-today" class="ghost mini-ghost" hidden>回到今天</button>
+      </section>
+
+      <section id="todos" class="todos"></section>
+    </main>
+
+    <section id="chatPanel" class="chat-panel">
+      <div class="chat-head">
+        <span class="chat-label" id="chat-label">对话</span>
+        <span class="chat-grow"></span>
+        <button id="btn-chat-close" class="mini-tool txt" title="收起对话（Esc）">收起 ▾</button>
+      </div>
+      <div id="chat" class="chat"></div>
+    </section>
+
+    <div id="careBubble" class="care-bubble" hidden></div>
+
+    <div id="repeatMenu" class="repeat-menu" hidden>
+      <button data-repeat="" type="button">不重复</button>
+      <button data-repeat="daily" type="button">每天</button>
+      <button data-repeat="weekly" type="button">每周</button>
+      <button data-repeat="monthly" type="button">每月</button>
+    </div>
+
+    <footer id="composer">
+      <div id="composerShell" class="composer-shell">
+        <div id="placeholder" class="placeholder">
+          <span class="ph-dot"></span>
+          <span id="ph-text">今天要做什么？点这里跟我说…</span>
+        </div>
+        <textarea id="input" rows="2" spellcheck="false"></textarea>
+        <div id="actions" class="actions">
+          <button id="btn-undo" class="ghost" title="撤销上一步">↺ 撤销</button>
+          <span class="spacer"></span>
+          <span class="hint" id="hint">Enter 发送</span>
+          <button id="btn-send" class="send">说</button>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <div id="welcome" class="welcome" hidden>
+    <div class="welcome-card" role="dialog" aria-label="欢迎">
+      <div class="wl-head">
+        <b>欢迎用桌边</b>
+        <span>常驻桌面的 AI 备忘助手 · 2 分钟配好</span>
+      </div>
+
+      <div class="wl-step">
+        <span class="wl-num">1</span>
+        <div class="wl-main">
+          <label class="wl-label" for="w-provider">用一个模型服务</label>
+          <select id="w-provider">
+            <option value="deepseek">DeepSeek（推荐·便宜）</option>
+            <option value="siliconflow">硅基流动 SiliconFlow</option>
+            <option value="openai">OpenAI</option>
+            <option value="claude">Claude</option>
+            <option value="ollama">Ollama（本机跑，不用 Key）</option>
+          </select>
+          <div class="wl-tip" id="w-provider-tip"></div>
+        </div>
+      </div>
+
+      <div class="wl-step">
+        <span class="wl-num">2</span>
+        <div class="wl-main">
+          <label class="wl-label" for="w-key" id="w-key-label">把 API Key 粘在这里</label>
+          <input id="w-key" type="text" placeholder="sk-…" spellcheck="false" autocomplete="off" />
+          <div class="wl-tip" id="w-key-tip"></div>
+        </div>
+      </div>
+
+      <div class="wl-step">
+        <span class="wl-num">3</span>
+        <div class="wl-main">
+          <span class="wl-label">然后这样用它</span>
+          <ul class="wl-list">
+            <li>「今天要写周报，下午三点跟甲方开会」→ 自己拆成待办</li>
+            <li>「报销单交了」→ 找到那条勾掉</li>
+            <li><kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Space</kbd> 随时叫出来 / 收起来</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="wl-foot">
+        <button id="btn-welcome-skip" class="ghost mini" type="button">先跳过</button>
+        <button id="btn-welcome-ok" class="primary mini" type="button">开始使用</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="confirmMask" class="confirm-mask" hidden>
+    <div class="confirm-box" role="dialog" aria-label="确认">
+      <div class="confirm-title" id="confirm-title">上下文有点长了</div>
+      <div class="confirm-text" id="confirm-text"></div>
+      <div class="confirm-actions">
+        <button id="btn-confirm-once" class="primary mini" type="button">继续这一次</button>
+        <button id="btn-confirm-silent" class="ghost mini" type="button">继续，这一档别再提醒</button>
+        <button id="btn-confirm-cancel" class="ghost mini" type="button">算了</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="askMask" class="confirm-mask" hidden>
+    <div class="confirm-box" role="dialog" aria-label="输入">
+      <div class="confirm-title" id="ask-title">新建人设</div>
+      <div class="confirm-text" id="ask-label"></div>
+      <input id="ask-input" class="ask-input" type="text" maxlength="24" spellcheck="false" />
+      <div class="confirm-actions">
+        <button id="btn-ask-ok" class="primary mini" type="button">确定</button>
+        <button id="btn-ask-cancel" class="ghost mini" type="button">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="mask" class="mask" hidden>
+    <div class="panel" role="dialog" aria-label="设置">
+      <div class="panel-head">
+        <h2>设置</h2>
+        <span class="ver" id="ver"></span>
+        <button id="btn-close-settings" class="tool">✕</button>
+      </div>
+
+      <div class="panel-body">
+        <nav class="jump-bar" id="jump-bar">
+          <button class="jump" type="button" data-jump="g-assist">助手</button>
+          <button class="jump" type="button" data-jump="g-model">模型</button>
+          <button class="jump" type="button" data-jump="g-look">外观</button>
+          <button class="jump" type="button" data-jump="g-voice">声音</button>
+          <button class="jump" type="button" data-jump="g-remind">提醒</button>
+          <button class="jump" type="button" data-jump="g-care">关怀</button>
+          <button class="jump" type="button" data-jump="g-boot">播报与启动</button>
+        </nav>
+
+        <div class="group-title" id="g-assist">助手</div>
+
+        <div class="field">
+          <label for="f-persona-sel">人设</label>
+          <select id="f-persona-sel"></select>
+          <div class="mini-actions">
+            <button id="btn-persona-new" class="ghost mini" type="button" title="新建一个人设（聊天记录从空白开始）">+ 新建人设</button>
+            <button id="btn-persona-del" class="ghost mini" type="button" title="删掉当前人设和它的聊天记录">删除人设</button>
+            <span class="mini-note" id="persona-count"></span>
+          </div>
+          <div class="tip">每个人设的聊天记录和音色都是独立的；待办清单所有人设共用。</div>
+        </div>
+
+        <div class="field">
+          <label for="f-name">名字</label>
+          <input id="f-name" type="text" maxlength="12" spellcheck="false" placeholder="桌边" />
+          <div class="tip">这个人设的名字：标题、托盘、自称都会跟着变；留空就用产品名「桌边」。</div>
+        </div>
+
+        <div class="field">
+          <label for="f-persona">性格设定</label>
+          <textarea id="f-persona" rows="4" maxlength="8000" spellcheck="false"
+            placeholder="例如：说话简短直接，偶尔损我两句但别刻薄；提醒我别熬夜；推荐时间时给理由，不要空话。"></textarea>
+          <div class="tip" id="persona-tip">写什么它就照什么来。留空＝默认的温和助理风格。</div>
+          <div class="mini-actions">
+            <button id="btn-persona-import" class="ghost mini" type="button" title="从 .md / .txt 文件导入">导入 .md</button>
+            <button id="btn-persona-clear" class="ghost mini" type="button" title="清空性格设定">清空</button>
+            <span class="mini-note">也可以把这个 .md 直接拖进上面的框</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="f-retention">聊天记录保留</label>
+          <select id="f-retention">
+            <option value="3d">3 天</option>
+            <option value="1w">1 周</option>
+            <option value="1m">1 个月</option>
+            <option value="3m">3 个月</option>
+            <option value="1y">1 年</option>
+            <option value="forever">无限（不自动删）</option>
+          </select>
+          <div class="tip">只有聊天记录会被清理；待办永远保留。到期自动删，删掉就找不回来了。</div>
+          <div class="mini-actions">
+            <button id="btn-open-logs" class="ghost mini" type="button">管理聊天记录…</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="f-ctxwindow">上下文读取</label>
+          <select id="f-ctxwindow">
+            <option value="3d">最近 3 天</option>
+            <option value="1w">最近 1 周</option>
+            <option value="1m">最近 1 个月</option>
+            <option value="3m">最近 3 个月</option>
+            <option value="1y">最近 1 年</option>
+            <option value="forever">全部记录</option>
+          </select>
+          <select id="f-ctxmode">
+            <option value="mixed">精简（近 3 天原文 + 更早只发摘要，省 token）</option>
+            <option value="full">全量（原文全发，最准但更贵）</option>
+          </select>
+          <div class="tip" id="ctx-tip">每次会把选中窗口内的对话发给模型；条数太多时会先问你要不要继续。</div>
+        </div>
+
+        <div class="field switch-row">
+          <div>
+            <div class="switch-title">AI 细分步骤</div>
+            <div class="switch-sub">开：把一条待办拆成几个小步骤（写周报 → 汇总进展 / 列出计划）。关：只记一条主待办。</div>
+          </div>
+          <label class="switch"><input id="f-ai-subtasks" type="checkbox" /><span></span></label>
+        </div>
+
+        <div class="group-title" id="g-model">模型</div>
+
+        <div class="field">
+          <label for="f-model">对话模型</label>
+          <select id="f-model"></select>
+          <input id="f-model-custom" type="text" spellcheck="false" placeholder="自定义模型名，例如 qwen-plus / llama3.1:8b" hidden />
+          <div class="tip" id="model-tip">日常记录用「快」；要它帮你算排期、权衡取舍时切「会思考」。也可以选「自定义」直接填模型名。</div>
+        </div>
+
+        <div class="field">
+          <label for="f-style">接口风格</label>
+          <select id="f-style">
+            <option value="openai">OpenAI 兼容（DeepSeek / 硅基流动 / OpenAI / LM Studio…）</option>
+            <option value="anthropic">Anthropic Claude</option>
+            <option value="ollama">Ollama（本地，不要 Key）</option>
+          </select>
+          <div class="tip" id="style-tip">地址会自动补路径，填到域名或 <code>…/v1</code> 都行。</div>
+        </div>
+
+        <div class="field">
+          <label for="f-base">接口地址</label>
+          <input id="f-base" type="text" spellcheck="false" placeholder="https://api.deepseek.com" />
+          <div class="tip" id="base-tip">本地服务写 <code>http://127.0.0.1:11434</code> 这种也行，http/https 都支持。</div>
+        </div>
+
+        <div class="field">
+          <label for="f-key" id="key-label">API Key</label>
+          <input id="f-key" type="password" placeholder="留空则不修改" autocomplete="off" spellcheck="false" />
+          <div class="tip" id="key-hint">只保存在本机，用 Windows 加密后写入配置文件。</div>
+        </div>
+
+        <div class="group-title" id="g-look">外观</div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="f-theme">主题</label>
+            <select id="f-theme">
+              <option value="auto">跟随时间自动</option>
+              <option value="light">白天</option>
+              <option value="dark">夜间</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <button id="btn-theme-swap" class="ghost wide">现在切换一下</button>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="f-daystart">白天开始</label>
+            <input id="f-daystart" type="time" />
+          </div>
+          <div class="field">
+            <label for="f-nightstart">夜间开始</label>
+            <input id="f-nightstart" type="time" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="f-opacity">界面透明度 <span class="val" id="opacity-val">100%</span></label>
+          <input id="f-opacity" type="range" min="55" max="100" step="1" />
+          <div class="tip">调低能看见壁纸，字会更清楚一点点；开着游戏时建议 85% 以上。滚动鼠标滚轮微调也行。</div>
+        </div>
+
+        <div class="group-title" id="g-voice">声音</div>
+
+        <div class="field">
+          <label for="f-active-voice">当前音色 <span id="voice-engine" class="val"></span></label>
+          <select id="f-active-voice"></select>
+        </div>
+
+        <div class="mini-actions">
+          <button id="btn-voice-add" class="ghost mini">＋ 添加音色</button>
+          <button id="btn-voice-test" class="ghost mini">试听</button>
+          <button id="btn-voice-remove" class="ghost mini">删除</button>
+        </div>
+        <div class="mini-note" id="voice-note">本地引擎要先启动本机语音服务</div>
+
+        <div id="voice-form" class="subform hidden">
+          <div class="field">
+            <label for="vf-name">名字</label>
+            <input id="vf-name" type="text" maxlength="24" placeholder="例如：播音员 · 小美" />
+          </div>
+          <div class="field">
+            <label for="vf-engine">引擎</label>
+            <select id="vf-engine">
+              <option value="local">本地 · IndexTTS（不联网、不花钱）</option>
+              <option value="fish">云端 · Fish Audio（要 Key，按量计费）</option>
+              <option value="edge">微软固定音色（不克隆，只换声音）</option>
+            </select>
+          </div>
+          <div class="field" id="vf-audio-field">
+            <label>参考音频</label>
+            <div class="mini-actions">
+              <button id="btn-voice-pick" class="ghost mini">选择音频…</button>
+              <span class="mini-note" id="vf-audio-name">还没选（5~30 秒、一个人说话、无背景音乐）</span>
+            </div>
+          </div>
+          <div class="field" id="vf-reftext-field">
+            <label for="vf-reftext">参考文本（可选）</label>
+            <input id="vf-reftext" type="text" maxlength="600" placeholder="那段音频里说的原话，填了更像" />
+          </div>
+          <div class="field hidden" id="vf-remote-field">
+            <label for="vf-remote">Fish 音色 ID</label>
+            <input id="vf-remote" type="text" placeholder="在 fish.audio 的音色页复制，例如 14cdaeb10984…" />
+          </div>
+          <div class="field hidden" id="vf-edge-field">
+            <label for="vf-edge">微软音色</label>
+            <select id="vf-edge">
+              <option value="zh-CN-XiaoxiaoNeural">晓晓 · 温柔女声</option>
+              <option value="zh-CN-XiaoyiNeural">晓伊 · 活泼女声</option>
+              <option value="zh-CN-YunxiNeural">云希 · 清朗男声</option>
+              <option value="zh-CN-YunjianNeural">云健 · 沉稳男声</option>
+            </select>
+          </div>
+          <div class="mini-actions">
+            <button id="btn-voice-save" class="primary mini">保存音色</button>
+            <button id="btn-voice-cancel" class="ghost mini">取消</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="f-fishkey">Fish Audio Key <span class="val" id="fishkey-hint"></span></label>
+          <input id="f-fishkey" type="password" placeholder="留空则不修改" />
+        </div>
+
+        <div class="switch-row">
+          <div>
+            <div class="switch-title">本地语音模型</div>
+            <div class="switch-sub">关掉立刻释放显存，本地音色会自动换成微软晓晓</div>
+          </div>
+          <label class="switch"><input id="f-local-enabled" type="checkbox" /><span></span></label>
+        </div>
+
+        <div class="field">
+          <label for="f-localurl">本地语音服务 <span class="val" id="local-state">未检测</span></label>
+          <div class="mini-actions">
+            <input id="f-localurl" type="text" spellcheck="false" />
+            <button id="btn-local-check" class="ghost mini">检测</button>
+            <button id="btn-local-start" class="ghost mini">立即加载</button>
+          </div>
+          <div class="tip" id="local-tip">第一次加载模型约 30~60 秒，之后 5~7 秒一句。</div>
+        </div>
+
+        <div class="field">
+          <label for="f-rate">语速 <span id="rate-label" class="val">正常</span></label>
+          <input id="f-rate" type="range" min="-40" max="40" step="5" />
+        </div>
+
+        <div class="field">
+          <label for="f-volume">音量 <span id="volume-label" class="val">90%</span></label>
+          <input id="f-volume" type="range" min="20" max="100" step="5" />
+        </div>
+
+        <div class="switch-row">
+          <div>
+            <div class="switch-title">声音柔和一点</div>
+            <div class="switch-sub">削掉一点高频，云端音色不那么刺耳（本地音色也生效）</div>
+          </div>
+          <label class="switch"><input id="f-warm" type="checkbox" /><i></i></label>
+        </div>
+
+        <div class="switch-row">
+          <div>
+            <div class="switch-title">自动朗读</div>
+            <div class="switch-sub">回复后自动用语音读一遍</div>
+          </div>
+          <label class="switch"><input id="f-autospeak" type="checkbox" /><span></span></label>
+        </div>
+
+        <div class="switch-row">
+          <div>
+            <div class="switch-title">朗读全文</div>
+            <div class="switch-sub">关：只读摘要；开：把回复整段读完</div>
+          </div>
+          <label class="switch"><input id="f-speakfull" type="checkbox" /><span></span></label>
+        </div>
+
+        <div class="group-title" id="g-remind">提醒</div>
+
+        <div class="field">
+          <div class="tip">不占清单的小闹钟：久坐、喝水、吃药、站起来走走。到点它会<b>用当前人设的口吻</b>换着说法提醒你（AI 现编，失败时用内置说法），也可以只弹气泡。</div>
+          <div id="reminder-list" class="reminder-list"></div>
+          <div class="mini-actions">
+            <button id="btn-remind-add" class="ghost mini" type="button">+ 添加提醒</button>
+            <button id="btn-remind-preset" class="ghost mini" type="button" title="加一条「每小时起身走走」">一键久坐提醒</button>
+          </div>
+          <div id="reminder-form" class="subform hidden">
+            <div class="field">
+              <label for="rf-title">提醒什么</label>
+              <input id="rf-title" type="text" maxlength="40" spellcheck="false" placeholder="起来走两步 / 喝水 / 吃药" />
+            </div>
+            <div class="field">
+              <label for="rf-kind">什么时候</label>
+              <select id="rf-kind">
+                <option value="every">每隔一段时间</option>
+                <option value="daily">每天固定时刻</option>
+              </select>
+            </div>
+            <div class="field" id="rf-every-wrap">
+              <label for="rf-every">间隔（分钟）</label>
+              <input id="rf-every" type="number" min="5" max="600" step="5" value="45" />
+            </div>
+            <div class="field hidden" id="rf-times-wrap">
+              <label for="rf-times">每天几点（逗号分隔，如 09:00,15:30）</label>
+              <input id="rf-times" type="text" maxlength="60" spellcheck="false" value="09:00" />
+            </div>
+            <div class="mini-actions">
+              <button id="btn-remind-save" class="primary mini" type="button">保存提醒</button>
+              <button id="btn-remind-cancel" class="ghost mini" type="button">取消</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="group-title" id="g-care">关怀</div>
+
+        <div class="field switch-row">
+          <div>
+            <div class="switch-title">日常关怀</div>
+            <div class="switch-sub">隔一阵子主动说一句：喝口水、起来走走、眼睛歇会儿、早点睡。</div>
+          </div>
+          <label class="switch"><input id="f-care-on" type="checkbox" /><span></span></label>
+        </div>
+
+        <div class="field switch-row">
+          <div>
+            <div class="switch-title">关怀时念出来</div>
+            <div class="switch-sub">关掉就只弹气泡，不出声。</div>
+          </div>
+          <label class="switch"><input id="f-care-speak" type="checkbox" /><span></span></label>
+        </div>
+
+        <div class="field">
+          <label for="f-care-every">多久关心一次 <span class="val" id="care-every-label">50 分钟</span></label>
+          <input id="f-care-every" type="range" min="15" max="180" step="5" value="50" />
+          <div class="mini-actions">
+            <button id="btn-care-test" class="ghost mini" type="button">现在说一句试试</button>
+            <span class="mini-note">夜里不打扰，见下面</span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>不打扰的时段</label>
+          <div class="row2">
+            <input id="f-quiet-start" type="time" value="22:30" />
+            <input id="f-quiet-end" type="time" value="08:00" />
+          </div>
+          <div class="tip">这段时间里提醒和关怀都不出声、不弹窗（早安播报除外）。</div>
+        </div>
+
+        <div class="group-title" id="g-boot">播报与启动</div>
+
+        <div class="switch-row">
+          <div>
+            <div class="switch-title">定时播报</div>
+            <div class="switch-sub">早上读今日计划，晚上读完成情况</div>
+          </div>
+          <label class="switch"><input id="f-briefon" type="checkbox" /><span></span></label>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label for="f-morning">早间播报</label>
+            <input id="f-morning" type="time" />
+          </div>
+          <div class="field">
+            <label for="f-evening">晚间播报</label>
+            <input id="f-evening" type="time" />
+          </div>
+        </div>
+
+        <div class="switch-row">
+          <div>
+            <div class="switch-title">开机自动启动</div>
+            <div class="switch-sub">登录 Windows 后自动出现</div>
+          </div>
+          <label class="switch"><input id="f-autostart" type="checkbox" /><span></span></label>
+        </div>
+
+        <div class="panel-foot">
+          <button id="btn-test" class="ghost">试听语音</button>
+          <button id="btn-clear-key" class="ghost">清除 Key</button>
+          <span class="spacer"></span>
+          <button id="btn-save" class="primary">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="grip" class="grip" title="拖动改变大小"></div>
+
+  <div id="logMask" class="mask logs-mask" hidden>
+    <div class="panel" role="dialog" aria-label="聊天记录">
+      <div class="panel-head">
+        <h2>聊天记录</h2>
+        <span class="ver" id="log-count"></span>
+        <button id="btn-close-logs" class="tool" type="button">✕</button>
+      </div>
+
+      <div class="log-bar">
+        <select id="log-range">
+          <option value="all">全部时间</option>
+          <option value="today">今天</option>
+          <option value="7d">近 7 天</option>
+          <option value="30d">近 30 天</option>
+          <option value="90d">近 90 天</option>
+        </select>
+        <input id="log-q" type="text" placeholder="搜内容…" spellcheck="false" />
+        <button id="btn-log-export" class="ghost mini" type="button">导出</button>
+        <button id="btn-log-clear" class="ghost mini danger" type="button">清空</button>
+      </div>
+
+      <div class="panel-body log-body" id="log-list"></div>
+
+      <div class="panel-foot">
+        <span class="log-hint" id="log-hint"></span>
+        <span class="spacer"></span>
+        <button id="btn-log-more" class="ghost mini" type="button" hidden>加载更多</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
