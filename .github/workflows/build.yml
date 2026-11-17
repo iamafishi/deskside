@@ -9,6 +9,8 @@ on:
 jobs:
   windows:
     runs-on: windows-latest
+    permissions:
+      contents: write          # 建 draft Release 需要写权限（默认是只读）
     steps:
       - uses: actions/checkout@v4
 
