@@ -31,11 +31,6 @@
     "start": "node -e \"const{spawn}=require('child_process');const env={...process.env};delete env.ELECTRON_RUN_AS_NODE;spawn(require('electron'),['.'],{stdio:'inherit',env})\"",
     "build": "bash build.sh"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "electron"
-    ]
-  },
   "devDependencies": {
     "@electron/packager": "^18.4.4",
     "electron": "^38.8.6"

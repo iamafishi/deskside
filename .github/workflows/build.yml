@@ -27,7 +27,9 @@ jobs:
           pnpm -v
 
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --no-frozen-lockfile --ignore-scripts
+        # --ignore-scripts：electron 的二进制由 electron-packager 自己按版本下载，
+        # CI 里不需要在 node_modules 里装一份（也避开 pnpm 的 ERR_PNPM_IGNORED_BUILDS）。
 
       - name: Build (electron-packager)
         shell: bash
